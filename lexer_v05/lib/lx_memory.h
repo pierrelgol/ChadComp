@@ -2,7 +2,7 @@
 #define LX_MEMORY_H
 
 #include <assert.h>
-#include <stddef.h>
+#include <sys/cdefs.h>
 #include <stdlib.h>
 
 typedef void  (*deallocator)(void *);
