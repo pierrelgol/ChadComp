@@ -1,10 +1,6 @@
-# CCompiler
+# ChadComp
 
-This is a project that I'm going to use as an excuse to learn zig, and how to
-use zig to build a micro functionnning C compiler. No idea when it's going to be
-ready but here we go.
+Chad comp is a project of mine of writting a real C99 compiler from stractch, using nothing but C code. Ultimately this project will be ported to even Chader Zig code.
 
-I will start by writting a functionning C compiler in C from scratch using
-nothing but standard library functions. Then I will do the same in zig and
-I will compare how easy it is for each language, as well as the speed of both
-compilers.
+This project sole purpose is to learn how a compiler is working. This compiler will be hand written entirely, no flex, yacc, or soyboy clang llvm backend. It will probably be horrible. But only real chad can understand the need for a man to make his own C compiler.
+
