@@ -224,13 +224,18 @@ lexer_produce_token(Lexer *self)
 			token.col_end += 1;
 			scanner_eat_character(scan);
 		}
-		token.kind = is_operator_kind(ch1, ch2, ch3);
+		if (ch1 == '(')
+			token.kind = TOK_OP_L_PAR;
+		else if (ch1 == '[')
+			token.kind = TOK_OP_L_BRACK;
+		else
+			token.kind = is_operator_kind(ch1, ch2, ch3);
 		return (token);
 	}
 
 	if (is_punctuator(ch1))
 	{
-		token.kind = TOK_PUNCTUATOR;
+		token.kind = is_punctuator_kind(ch1);
 		token.ptr_len += 1;
 		token.col_end += 1;
 		scanner_eat_character(scan);
@@ -329,13 +334,25 @@ is_operator(int n)
         	case '!' : return (true);
         	case '~' : return (true);
         	case '(' : return (true);
-        	case ')' : return (true);
         	case '[' : return (true);
-        	case ']' : return (true);
         	case '<' : return (true);
         	case '>' : return (true);
         	case '?' : return (true);
         	case ':' : return (true);
+		default  : return (false);
+        }
+}
+
+TokenKind
+is_punctuator_kind(int n1)
+{
+	switch (n1) {
+		case '{' : return (TOK_PUN_LCURL);
+		case '}' : return (TOK_PUN_RCURL);
+		case ';' : return (TOK_PUN_SCOLON);
+		case ',' : return (TOK_PUN_COMMA);
+		case ']' : return (TOK_PUN_RBRACK);
+		case ')' : return (TOK_PUN_RPAR);
 		default  : return (false);
         }
 }
@@ -389,10 +406,8 @@ is_operator_kind(int n1, int n2, int n3)
 			default  : return (TOK_OP_NOT);
 		}
 		case '(' : return (TOK_OP_L_PAR);
-		case ')' : return (TOK_OP_R_PAR);
 		case '.' : return (TOK_OP_DOT);
 		case '[' : return (TOK_OP_L_BRACK);
-		case ']' : return (TOK_OP_R_BRACK);
 		case '~' : switch(n2){
 			case '=' : return (TOK_OP_TILDE_EQ);
 			default  : return (TOK_OP_TILDE);
@@ -427,6 +442,8 @@ is_punctuator(int n)
 		case '}' : return (true);
 		case ';' : return (true);
 		case ',' : return (true);
+		case ']' : return (true);
+		case ')' : return (true);
 		default  : return (false);
         }
 }

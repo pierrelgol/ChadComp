@@ -24,6 +24,13 @@ char *token_to_str(Token *token)
         case TOK_NUM_LITERAL   : return ("num_lit");
         case TOK_PUNCTUATOR    : return ("punctuator");
         case TOK_OPERATOR      : return ("operator");
+	case TOK_PUN_LCURL     : return ("lcurl");
+	case TOK_PUN_RCURL     : return ("rcurl");
+	case TOK_PUN_RPAR      : return ("rpar");
+	case TOK_PUN_RBRACK    : return ("rbrack");
+	case TOK_PUN_SCOLON    : return ("scolon");
+	case TOK_PUN_COMMA     : return ("comma");
+	case TOK_PUN_COLON     : return ("colon");
         case TOK_ERROR         : return (RED"error"RESET);
         case TOK_KW_AUTO       : return ("auto");
         case TOK_KW_BREAK      : return ("break");
@@ -71,10 +78,10 @@ char *token_to_str(Token *token)
         case TOK_OP_TILDE      : return ("tilde");
         case TOK_OP_QMARK      : return ("qmark");
         case TOK_OP_COLON      : return ("colon");
-        case TOK_OP_L_PAR      : return ("l_par");
-        case TOK_OP_R_PAR      : return ("r_par");
-        case TOK_OP_L_BRACK    : return ("l_brack");
-        case TOK_OP_R_BRACK    : return ("r_brack");
+        // case TOK_OP_L_PAR      : return ("l_par");
+        // case TOK_OP_R_PAR      : return ("r_par");
+        // case TOK_OP_L_BRACK    : return ("l_brack");
+        // case TOK_OP_R_BRACK    : return ("r_brack");
         case TOK_OP_L_CHEV     : return ("l_chev");
         case TOK_OP_R_CHEV     : return ("r_chev");
         case TOK_OP_DOT        : return ("dot");
@@ -102,7 +109,6 @@ char *token_to_str(Token *token)
         case TOK_OP_2RCHEV_EQ  : return ("2rchev_eq");
         case TOK_OP_TERNARY    : return ("ternary");
 	default		       : return ("error");
-          break;
         }
 }
 

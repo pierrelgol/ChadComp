@@ -242,6 +242,14 @@ typedef enum	e_tokenkind
 	TOK_OPERATOR,
 	TOK_END,
 
+	TOK_PUN_COMMA,
+	TOK_PUN_LCURL,
+	TOK_PUN_RCURL,
+	TOK_PUN_RPAR,
+	TOK_PUN_RBRACK,
+	TOK_PUN_SCOLON,
+	TOK_PUN_COLON,
+
 	TOK_KW_AUTO,
 	TOK_KW_BREAK,
 	TOK_KW_CASE,
@@ -290,9 +298,7 @@ typedef enum	e_tokenkind
 	TOK_OP_QMARK,
 	TOK_OP_COLON,
 	TOK_OP_L_PAR,
-	TOK_OP_R_PAR,
 	TOK_OP_L_BRACK,
-	TOK_OP_R_BRACK,
 	TOK_OP_L_CHEV,
 	TOK_OP_R_CHEV,
 	TOK_OP_DOT,
@@ -387,7 +393,8 @@ int
 is_operator(int n);
 int
 is_operator_inside(int n);
-
+TokenKind
+is_punctuator_kind(int n);
 TokenKind 
 is_operator_kind(int n1, int n2, int n3);
 int 
