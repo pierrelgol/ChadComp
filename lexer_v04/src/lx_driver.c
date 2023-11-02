@@ -9,6 +9,7 @@ void driver_print_token(Token *tok)
 	};
 	// printf("[ls:%d][cs:%d]", tok->row_start, tok->col_start);
 	printf("%s:%.*s", kind[tok->kind], tok->ptr_len, tok->ptr);
+	// printf("%s:%s", kind[tok->kind], tok->ptr);
 	// printf("[le:%d][ce:%d]\n", tok->row_end, tok->col_end);
 }
 

@@ -1,6 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <stddef.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -165,7 +166,7 @@ typedef struct	s_scanner
 Scanner 
 *scanner_init(const char *path, unique_ptr *content, int content_size, MemRes *memory_manager);
 int
-scanner_skip(Scanner *self, bool (*controller)(int ch));
+scanner_skip(Scanner *self, int (*controller)(int ch));
 int 
 scanner_rewind_character(Scanner *self);
 int 
@@ -230,14 +231,93 @@ scanner_dispose(Scanner *self);
 typedef enum	e_tokenkind
 {
 	TOK_END = 0,
-	TOK_DIRECTIVE = 0,
-	TOK_IDENTIFIER = 0,
-	TOK_KEYWORD = 0,
-	TOK_STR_LITERAL = 0,
-	TOK_NUM_LITERAL = 0,
+	TOK_DIRECTIVE,
+	TOK_IDENTIFIER,
+	TOK_KEYWORD,
+	TOK_SINGLL_COMMENT,
+	TOK_MULTIL_COMMENT,
+	TOK_STR_LITERAL,
+	TOK_NUM_LITERAL,
 	TOK_PUNCTUATOR,
 	TOK_OPERATOR,
 	TOK_ERROR,
+
+	TOK_KW_AUTO,
+	TOK_KW_BREAK,
+	TOK_KW_CASE,
+	TOK_KW_CHAR,
+	TOK_KW_CONST,
+	TOK_KW_CONTINUE,
+	TOK_KW_DEFAULT,
+	TOK_KW_DO,
+	TOK_KW_DOUBLE,
+	TOK_KW_ELSE,
+	TOK_KW_ENUM,
+	TOK_KW_EXTERN,
+	TOK_KW_FLOAT,
+	TOK_KW_FOR,
+	TOK_KW_GOTO,
+	TOK_KW_IF,
+	TOK_KW_INT,
+	TOK_KW_LONG,
+	TOK_KW_REGISTER,
+	TOK_KW_RESTRICT,
+	TOK_KW_RETURN,
+	TOK_KW_SHORT,
+	TOK_KW_SIGNED,
+	TOK_KW_SIZEOF,
+	TOK_KW_STATIC,
+	TOK_KW_STRUCT,
+	TOK_KW_SWITCH,
+	TOK_KW_TYPEDEF,
+	TOK_KW_UNION,
+	TOK_KW_UNSIGNED,
+	TOK_KW_VOID,
+	TOK_KW_VOLATILE,
+	TOK_KW_WHILE,
+
+	TOK_OP_PLUS,
+	TOK_OP_MINUS,
+	TOK_OP_MULT,
+	TOK_OP_DIV,
+	TOK_OP_MOD,
+	TOK_OP_EQ,
+	TOK_OP_AMPERSAND,
+	TOK_OP_OR,
+	TOK_OP_XOR,
+	TOK_OP_NOT,
+	TOK_OP_TILDE,
+	TOK_OP_QMARK,
+	TOK_OP_COLON,
+	TOK_OP_L_PAR,
+	TOK_OP_R_PAR,
+	TOK_OP_L_BRACK,
+	TOK_OP_R_BRACK,
+	TOK_OP_L_CHEV,
+	TOK_OP_R_CHEV,
+	TOK_OP_DOT,
+
+	TOK_OP_PLUS_PLUS,
+	TOK_OP_MINUS_MINUS,
+	TOK_OP_2LCHEV,
+	TOK_OP_2RCHEV,
+	TOK_OP_PLUS_EQ,
+	TOK_OP_MINUS_EQ,
+	TOK_OP_MULT_EQ,
+	TOK_OP_DIV_EQ,
+	TOK_OP_MOD_EQ,
+	TOK_OP_EQ_EQ,
+	TOK_OP_AND_EQ,
+	TOK_OP_OR_EQ,
+	TOK_OP_XOR_EQ,
+	TOK_OP_NOT_EQ,
+	TOK_OP_TILDE_EQ,
+	TOK_OP_LCHEV_EQ,
+	TOK_OP_RCHEV_EQ,
+	TOK_OP_2LCHEV_EQ,
+	TOK_OP_2RCHEV_EQ,
+
+	TOK_OP_TERNARY,
 	
 }		TokenKind;
 
@@ -245,8 +325,8 @@ typedef enum	e_tokenkind
 
 typedef struct	s_token
 {
-	TokenKind 	kind;
-	int 		token_flags;
+	TokenKind 		kind;
+	int 					token_flags;
 
 	int		line_start;
 	int		col_start;
@@ -288,5 +368,42 @@ Token
 
 void
 lexer_dispose(Lexer *self);
+
+int 
+is_newline(int n);
+int	
+is_whitespace(int n);
+int 
+is_alpha(int n);
+int 
+is_alnum(int n);
+int 
+is_digit(int n);
+TokenKind 
+is_operator(int n1, int n2, int n3);
+int 
+is_punctuator(int n);
+int 
+is_identifier_start(int n);
+int 
+is_identifier_inside(int n);
+int 
+is_comment_start(int n1, int n2);
+int 
+is_single_line_commment_end(int n);
+int 
+is_multi_line_commment_end(int n1, int n2);
+int 
+is_directive(int n);
+int
+is_string_literal_start(int n);
+int
+is_string_literal_end(int n);
+int
+is_number_literal_inside(int n);
+int
+tokncmp(char *s1, char *s2, int n);
+TokenKind 
+is_keyword(Token *token);
 
 #endif

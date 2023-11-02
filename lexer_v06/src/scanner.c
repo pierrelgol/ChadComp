@@ -18,7 +18,7 @@ Scanner
 }
 
 int
-scanner_skip(Scanner *self, bool (*controller)(int ch))
+scanner_skip(Scanner *self, int (*controller)(int ch))
 {
 	int ch;
 
@@ -41,7 +41,10 @@ int
 scanner_eat_character(Scanner *self)
 {
 	if (self->scanner_content[self->current_cursor_position] == '\n')
+	{
 		self->current_line += 1;
+		self->current_line_begin = self->current_cursor_position;
+	}
 	self->current_cursor_position += 1;	
 	if (self->current_cursor_position >= self->content_size)
 		return (EOF);

@@ -1,26 +1,11 @@
 #include "lib/lexer.h"
-#include "stdbool.h"
-#include <stdio.h>
-
-bool	iswspc(int n)
-{
-	switch (n) {
-        case 9 ... 13 : return (true);
-        case 32       : return (true);
-	default       : return (false);
-        }
-}
-
-bool	is_tab(int n)
-{
-	return (n == '\t');
-}
 
 int 	main(int argc, char **argv)
 {
 	MemRes 		*mem;
 	File 		*file; 
 	Scanner 	*scan;
+	Lexer		*lexer;
 	int		count;
 	unique_ptr	ownership;
 
@@ -51,18 +36,14 @@ int 	main(int argc, char **argv)
 				fprintf(stderr, "Error : Scanner initialization failed\n");
 			else
 			{
-				int ch;
-				while ((ch = scanner_peek_curr_character(scan)) != EOF)
-				{
-					if (is_tab(ch))
-						scanner_skip(scan, is_tab);	
-					ch = scanner_peek_curr_character(scan);
-					printf("%c",ch);
-					scanner_eat_character(scan);
-				}
+				lexer = lexer_init(scan, mem, file->file_path);
+				if (!lexer)
+					fprintf(stderr, "Error : Lexer initialization failed\n");
 			}
+			lexer_dispose(lexer);
 			scanner_dispose(scan);
 			file_dispose(file);
+			lexer 	  = NULL;
 			file      = NULL;
 			scan      = NULL;
 			ownership = NULL;

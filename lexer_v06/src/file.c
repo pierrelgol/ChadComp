@@ -17,7 +17,7 @@
 File  
 *file_init(const char *file_path, MemRes *memory_manager)
 {
-	File *self;	
+	File *self;
 
 	if (!file_path || !memory_manager)
 		return (NULL);
