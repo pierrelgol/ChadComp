@@ -1,4 +1,5 @@
 #include "lib/lexer.h"
+#include <stdio.h>
 
 Scanner 
 *scanner_init(const char *path, unique_ptr *content, int content_size, MemRes *memory_manager)

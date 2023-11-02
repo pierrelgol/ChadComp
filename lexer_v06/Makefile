@@ -33,6 +33,6 @@ fclean: clean
 	$(RM) $(NAME)
 
 test :
-	./$(NAME) ./bin/test.c ./bin/test1.c ./bin/test2.c
+	./$(NAME) ./bin/test1.c
 
 re: fclean all test

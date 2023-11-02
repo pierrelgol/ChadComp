@@ -230,7 +230,7 @@ scanner_dispose(Scanner *self);
 
 typedef enum	e_tokenkind
 {
-	TOK_END = 0,
+	TOK_ERROR = 0,
 	TOK_DIRECTIVE,
 	TOK_IDENTIFIER,
 	TOK_KEYWORD,
@@ -240,7 +240,7 @@ typedef enum	e_tokenkind
 	TOK_NUM_LITERAL,
 	TOK_PUNCTUATOR,
 	TOK_OPERATOR,
-	TOK_ERROR,
+	TOK_END,
 
 	TOK_KW_AUTO,
 	TOK_KW_BREAK,
@@ -303,12 +303,15 @@ typedef enum	e_tokenkind
 	TOK_OP_2RCHEV,
 	TOK_OP_PLUS_EQ,
 	TOK_OP_MINUS_EQ,
+	TOK_OP_STRUCT_PTR,
 	TOK_OP_MULT_EQ,
 	TOK_OP_DIV_EQ,
 	TOK_OP_MOD_EQ,
 	TOK_OP_EQ_EQ,
 	TOK_OP_AND_EQ,
+	TOK_OP_AND_AND,
 	TOK_OP_OR_EQ,
+	TOK_OP_OR_OR,
 	TOK_OP_XOR_EQ,
 	TOK_OP_NOT_EQ,
 	TOK_OP_TILDE_EQ,
@@ -365,7 +368,8 @@ Token
 *lexer_peek_prev_token(Lexer *self);
 Token
 *lexer_peek_next_token(Lexer *self);
-
+Token
+lexer_produce_token(Lexer *self);
 void
 lexer_dispose(Lexer *self);
 
@@ -379,8 +383,13 @@ int
 is_alnum(int n);
 int 
 is_digit(int n);
+int
+is_operator(int n);
+int
+is_operator_inside(int n);
+
 TokenKind 
-is_operator(int n1, int n2, int n3);
+is_operator_kind(int n1, int n2, int n3);
 int 
 is_punctuator(int n);
 int 

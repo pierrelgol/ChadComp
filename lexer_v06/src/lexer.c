@@ -1,4 +1,6 @@
 #include "lib/lexer.h"
+#include "stdbool.h"
+#include <ctype.h>
 #include <stdio.h>
 
 static Token cbuffer[CBUFFER_SIZE];
@@ -61,11 +63,10 @@ lexer_dispose(Lexer *self)
 		self->memory_manager->dealloc(self);
 }
 
-
 Token
-*lexer_produce_token(Lexer *self)
+lexer_produce_token(Lexer *self)
 {
-	Token 	*token;
+	Token 	token;
 	MemRes	*mem;
 	Scanner *scan;
 	int	ch1;
@@ -74,16 +75,16 @@ Token
 
 	mem = self->memory_manager;
 	scan = self->scan;
-	token = (Token *) mem->alloc(1, sizeof(Token));
-	scanner_skip(scan, is_whitespace);
-	if (!token)
-	{
-		fprintf(stderr, "Error : Lexer failed to produce new token!\n");
-		return (NULL);
-	}
-	token->col_start = scan->current_cursor_position - scan->current_line_begin;
-	token->line_start = scan->current_line;
-	token->ptr = &scan->scanner_content[scan->current_cursor_position];
+	scanner_skip(scan, isspace);
+	token.col_start = scan->current_cursor_position - scan->current_line_begin;
+	token.line_start = scan->current_line;
+	token.col_end = token.col_start;
+	token.line_end = token.line_start;
+	token.token_flags = 0;
+	token.kind = TOK_ERROR;
+	token.path = scan->content_path;
+	token.ptr_len = 0;
+	token.ptr = &scan->scanner_content[scan->current_cursor_position];
 
 	ch1 = scanner_peek_curr_character(scan);
 	ch2 = scanner_peek_next_character(scan);
@@ -93,27 +94,29 @@ Token
 
 	if (is_directive(ch1))
 	{
-		token->kind = TOK_DIRECTIVE;
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.kind = TOK_DIRECTIVE;
+		token.ptr_len += 1;
+		token.col_end += 1;
+		scanner_eat_character(scan);
 		while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
 		{
+			scanner_eat_character(scan);
+			token.ptr_len += 1;
+			token.col_end += 1;
 			if (is_newline(ch1))
 				break;
-			scanner_eat_character(scan);
-			token->ptr_len += 1;
-			token->col_end += 1;
 		}
 		scanner_eat_character(scan);
 		return (token);
 	}
 
+
 	if (is_comment_start(ch1, ch2))
 	{
 		if (ch1 == '/' && ch2 == '/')
 		{
-			token->ptr_len += 2;
-			token->col_end += 2;
+			token.ptr_len += 2;
+			token.col_end += 2;
 			scanner_eat_character(scan);
 			scanner_eat_character(scan);
 			while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
@@ -121,29 +124,31 @@ Token
 				if (is_single_line_commment_end(ch1))
 					break;
 				scanner_eat_character(scan);
-				token->ptr_len += 1;
-				token->col_end += 1;
+				token.ptr_len += 1;
+				token.col_end += 1;
 			}
-			token->kind = TOK_SINGLL_COMMENT;
+			token.kind = TOK_SINGLL_COMMENT;
 			scanner_eat_character(scan);
 			return (token);
 		}
 		else
 		{
-			token->ptr_len += 2;
-			token->col_end += 2;
+			token.ptr_len += 2;
+			token.col_end += 2;
 			scanner_eat_character(scan);
 			scanner_eat_character(scan);
 			while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
 			{
+				ch2 = scanner_peek_next_character(scan);
 				if (is_multi_line_commment_end(ch1, ch2))
 					break;
 				scanner_eat_character(scan);
-				ch2 = scanner_peek_next_character(scan);
-				token->ptr_len += 1;
-				token->col_end += 1;
+				token.ptr_len += 1;
+				token.col_end += 1;
 			}
-			token->kind = TOK_MULTIL_COMMENT;
+			token.kind = TOK_MULTIL_COMMENT;
+			token.ptr_len += 2;
+			token.col_end += 2;
 			scanner_eat_character(scan);
 			scanner_eat_character(scan);
 			return (token);
@@ -152,78 +157,102 @@ Token
 
 	if (is_identifier_start(ch1))
 	{
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.ptr_len += 1;
+		token.col_end += 1;
+		token.kind = TOK_IDENTIFIER;
 		scanner_eat_character(scan);
 		while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
 		{
 			if (!is_identifier_inside(ch1))
 				break;
 			scanner_eat_character(scan);
-			token->ptr_len += 1;
-			token->col_end += 1;
+			token.ptr_len += 1;
+			token.col_end += 1;
 		}
-		if (is_keyword(token))
-		{
-			scanner_eat_character(scan);
-			return (token);
-		}
-		scanner_eat_character(scan);
+		token.kind = is_keyword(&token);
+		// scanner_eat_character(scan);
 		return (token);
 	}
 
 	if (is_digit(ch1))
 	{
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.ptr_len += 1;
+		token.col_end += 1;
 		scanner_eat_character(scan);
 		while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
 		{
 			if (!is_number_literal_inside(ch1))
 				break;
 			scanner_eat_character(scan);
-			token->ptr_len += 1;
-			token->col_end += 1;
+			token.ptr_len += 1;
+			token.col_end += 1;
 		}
 		scanner_eat_character(scan);
-		token->kind = TOK_NUM_LITERAL;
+		token.kind = TOK_NUM_LITERAL;
 		return (token);
 	}
 
 	if (is_string_literal_start(ch1))
 	{	
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.ptr_len += 2;
+		token.col_end += 2;
 		scanner_eat_character(scan);
 		while ((ch1 = scanner_peek_curr_character(scan)) != EOF)
 		{
 			if (is_string_literal_end(ch1))
 				break;
 			scanner_eat_character(scan);
-			token->ptr_len += 1;
-			token->col_end += 1;
+			token.ptr_len += 1;
+			token.col_end += 1;
 		}
 		scanner_eat_character(scan);
-		token->kind = TOK_STR_LITERAL;
+		token.kind = TOK_STR_LITERAL;
 		return (token);
 	}
-	return (token);
+
+	if (is_operator(ch1))
+	{
+		token.kind = TOK_OPERATOR;
+		token.ptr_len += 1;
+		token.col_end += 1;
+		scanner_eat_character(scan);
+		while ((scanner_peek_curr_character(scan)) != EOF)
+		{
+			if (!is_operator(scanner_peek_curr_character(scan)))
+				break;
+			token.ptr_len += 1;
+			token.col_end += 1;
+			scanner_eat_character(scan);
+		}
+		token.kind = is_operator_kind(ch1, ch2, ch3);
+		return (token);
+	}
+
+	if (is_punctuator(ch1))
+	{
+		token.kind = TOK_PUNCTUATOR;
+		token.ptr_len += 1;
+		token.col_end += 1;
+		scanner_eat_character(scan);
+		return (token);
+	}
 
 	if (scanner_peek_curr_character(scan) == EOF)
 	{
-		token->kind = TOK_END;
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.kind = TOK_END;
+		token.ptr_len += 1;
+		token.col_end += 1;
 		return (token);
 	}
 	else
 	{
 		scanner_eat_character(scan);
-		token->kind = TOK_ERROR;
-		token->ptr_len += 1;
-		token->col_end += 1;
+		token.kind = TOK_ERROR;
+		token.ptr_len += 1;
+		token.col_end += 1;
 		return (token);
 	}
+	scanner_eat_character(scan);
 	__builtin_unreachable();
 }
 
@@ -233,15 +262,24 @@ is_newline(int n)
 	return (n == '\n');
 }
 
+// int
+// is_operator_inside(int n)
+// {
+// 	switch (n) {
+//          case '':
+//         }
+// }
+
 int 	
 is_whitespace(int n)
 {
 	switch (n) {
 		case 9         : return (true);
 		case 11 ... 13 : return (true);
-        	case ' '       : return (true);
+        	case 32        : return (true);
 		default	       : return (false);
         }
+	return (false);
 }
 
 int 	
@@ -274,8 +312,36 @@ is_digit(int n)
         }
 }
 
+int
+is_operator(int n)
+{
+	switch (n) {
+        	case '+' : return (true);
+        	case '-' : return (true);
+        	case '*' : return (true);
+        	case '/' : return (true);
+        	case '%' : return (true);
+        	case '=' : return (true);
+        	case '.' : return (true);
+        	case '&' : return (true);
+        	case '|' : return (true);
+        	case '^' : return (true);
+        	case '!' : return (true);
+        	case '~' : return (true);
+        	case '(' : return (true);
+        	case ')' : return (true);
+        	case '[' : return (true);
+        	case ']' : return (true);
+        	case '<' : return (true);
+        	case '>' : return (true);
+        	case '?' : return (true);
+        	case ':' : return (true);
+		default  : return (false);
+        }
+}
+
 TokenKind 	
-is_operator(int n1, int n2, int n3)
+is_operator_kind(int n1, int n2, int n3)
 {
 	switch (n1) {
 		case '+' : {
@@ -286,6 +352,7 @@ is_operator(int n1, int n2, int n3)
 		}
 		case '-' : switch(n2){
 			case '=' : return (TOK_OP_MINUS_EQ);
+			case '>' : return (TOK_OP_STRUCT_PTR);
 		}
 		case '*' : switch(n2){
 			case '=' : return (TOK_OP_MULT_EQ);
@@ -305,10 +372,12 @@ is_operator(int n1, int n2, int n3)
 		}
 		case '&' : switch(n2){
 			case '=' : return (TOK_OP_AND_EQ);
+			case '&' : return (TOK_OP_AND_AND);
 			default  : return (TOK_OP_AMPERSAND);
 		}
 		case '|' : switch(n2){
 			case '=' : return (TOK_OP_OR_EQ);
+			case '|' : return (TOK_OP_OR_OR);
 			default  : return (TOK_OP_OR);
 		}
 		case '^' : switch(n2){
@@ -431,7 +500,7 @@ is_string_literal_start(int n)
 int
 is_string_literal_end(int n)
 {
-	return (n == '"' || n == '\\');
+	return (n == '"');
 }
 
 int

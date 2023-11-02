@@ -1,31 +1,18 @@
-#include "../lib/lx_memory.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_putchar.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pollivie <pollivie@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/09/06 11:31:26 by pollivie          #+#    #+#             */
+/*   Updated: 2023/09/06 11:31:30 by pollivie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-FnMem *mem_init(void)
+#include <unistd.h>
+
+void	ft_putchar(char c)
 {
-	FnMem *self;
-
-	self = (FnMem *) malloc(sizeof(FnMem));
-	if (!self)
-		return (NULL);
-	self->alloc = calloc;
-	self->dealloc = free;
-	self->borrow = mem_borrow;
-	return (self);
+	write(1, &c, 1);
 }
-
-void *mem_borrow(void **from)
-{
-	void *unique_ptr;
-
-	unique_ptr = (*from);
-	(*from) = NULL;
-
-	return (unique_ptr);
-}
-
-void mem_dispose(FnMem *self)
-{
-	if (self)
-		free(self);
-}
-
